@@ -19,6 +19,7 @@ private:
     void saveEntries(const std::vector<IndexEntry>& entries);
 
 public:
+    std::vector<IndexEntry> getStagedEntries();
 
     explicit Index(const std::filesystem::path& indexPath);
 

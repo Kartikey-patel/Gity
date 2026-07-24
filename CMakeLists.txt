@@ -14,6 +14,9 @@ add_executable(vcs
     src/Hasher.cpp
     src/Index.cpp
     src/AddCommand.cpp
+    src/Tree.cpp
+    src/Commit.cpp
+    src/CommitCommand.cpp
 )
 
 target_link_libraries(vcs cryptopp)
