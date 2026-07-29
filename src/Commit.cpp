@@ -10,16 +10,22 @@ Commit::Commit(const std::string& treeHash,
       timestamp(std::time(nullptr))
 {
 }
+
 std::string Commit::serialize() const{
+
+    // Serialize the commit metadata into a text format
+    // that can be stored in the object database.
     std::ostringstream out;
 
     out << "tree " << treeHash <<'\n';
     
+    // The initial commit has no parent.
     if(!parentHash.empty()){
         out << "parent " << parentHash <<'\n';
     }
     out << "time " << timestamp <<'\n';
     out << "message " << message <<'\n';
 
+    // Return the serialized commit object.
     return out.str();
 }

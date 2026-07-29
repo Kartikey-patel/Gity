@@ -8,6 +8,7 @@
 
 int main(int argc, char* argv[])
 {
+    // Dispatch the requested command.
     if (argc < 2)
     {
         std::cout << "Usage:\n";
@@ -21,11 +22,13 @@ int main(int argc, char* argv[])
 
     std::filesystem::path vcsDirectory = ".vcs";
 
+    // Initialize a new repository.
     if (command == "init")
     {
         Repository repo;
         repo.init();
     }
+    // Stage a file.
     else if (command == "add")
     {
         if (argc < 3)
@@ -37,6 +40,7 @@ int main(int argc, char* argv[])
         AddCommand add(vcsDirectory);
         add.execute(argv[2]);
     }
+    // Create a new commit.
     else if (command == "commit")
     {
         if (argc < 3)
@@ -48,6 +52,7 @@ int main(int argc, char* argv[])
         CommitCommand commit(vcsDirectory);
         commit.execute(argv[2]);
     }
+    // Display the commit history.
     else if(command == "log")
     {
         LogCommand logCommand(vcsDirectory);

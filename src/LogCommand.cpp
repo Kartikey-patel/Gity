@@ -9,6 +9,8 @@ LogCommand::LogCommand(const std::filesystem::path& vcsDirectory)
 }
 
 std::string LogCommand::getCurrentCommitHash() const{
+
+    // Read the current branch reference from HEAD.
     std::ifstream file(vcsDirectory / "HEAD");
 
     if(!file.is_open()){
@@ -24,6 +26,8 @@ std::string LogCommand::getCurrentCommitHash() const{
     }
 
     line = line.substr(5);
+
+    // Load the latest commit hash from the branch file.
     std::ifstream refFile(vcsDirectory / line);
 
     if(!refFile.is_open()){
@@ -36,6 +40,8 @@ std::string LogCommand::getCurrentCommitHash() const{
 }
 
 void LogCommand::execute(){
+
+    // Start traversal from the latest commit.
     std::string currentHash = getCurrentCommitHash();
 
     if (currentHash.empty())
@@ -44,12 +50,15 @@ void LogCommand::execute(){
         return;
     }
 
+    // Follow the parent chain until the initial commit is reached.
     while(!currentHash.empty()){
         currentHash = printCommit(currentHash);
     }
 }
 
 std::string LogCommand::printCommit(const std::string& commitHash){
+
+    // Load the serialized commit object.
     std::string commitData = objectStore.loadObject(commitHash);
 
     std::istringstream stream(commitData);
@@ -61,6 +70,7 @@ std::string LogCommand::printCommit(const std::string& commitHash){
 
     std::string line;
 
+    // Parse the commit metadata.
     while(std::getline(stream,line)){
         if(line.find("parent") == 0){
             parentHash = line.substr(7);
@@ -76,10 +86,13 @@ std::string LogCommand::printCommit(const std::string& commitHash){
         }
     }
 
+    // Display the commit information.
     std::cout <<"commit:" << commitHash <<'\n';
     std::cout <<"Date:" << time <<'\n';
     std::cout <<"\n";
     std::cout <<"     " << message <<"\n\n"; 
 
+    // Return the parent hash so the caller can
+    // continue traversing the commit history.
     return parentHash;
 }
