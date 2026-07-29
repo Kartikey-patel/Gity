@@ -1,16 +1,15 @@
 #include "Commit.h"
 #include <sstream>
 
-Commit::Commit(const std::string& message,
-           const std::string& treeHash,
-           const std::string& parentHash)
-           : treeHash(treeHash),
-           parentHash(parentHash),
-           message(message),
-           timestamp(std::time(nullptr))
+Commit::Commit(const std::string& treeHash,
+               const std::string& parentHash,
+               const std::string& message)
+    : treeHash(treeHash),
+      parentHash(parentHash),
+      message(message),
+      timestamp(std::time(nullptr))
 {
 }
-
 std::string Commit::serialize() const{
     std::ostringstream out;
 

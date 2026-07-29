@@ -13,7 +13,7 @@ std::filesystem::path ObjectStore::getObjectPath(const std::string& hash){   // 
     return filePath;
 }
 
-bool ObjectStore::hasObject(const std::string& hash){   // check it thr hash is present in the object dir or not
+bool ObjectStore::hasObject(const std::string& hash){   // check it the hash is present in the object dir or not
 
     return std::filesystem::exists(getObjectPath(hash));
 }
@@ -31,3 +31,17 @@ void ObjectStore::storeObject(const std::string& hash, const std::string& data){
 
     file << data;
 }
+
+std::string ObjectStore::loadObject(const std::string& hash){
+    std::ifstream file(getObjectPath(hash));
+
+    if (!file.is_open())
+    {
+        return {};
+    }
+
+    std::stringstream buffer;
+    buffer << file.rdbuf();
+
+    return buffer.str();
+}    

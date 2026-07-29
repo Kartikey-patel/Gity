@@ -12,4 +12,6 @@ class ObjectStore{
         std::filesystem::path getObjectPath(const std::string& hash);
         
         void storeObject(const std::string& hash, const std::string& data);  
+
+        std::string loadObject(const std::string& hash);
 };

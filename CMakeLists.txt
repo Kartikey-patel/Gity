@@ -17,6 +17,7 @@ add_executable(vcs
     src/Tree.cpp
     src/Commit.cpp
     src/CommitCommand.cpp
+    src/LogCommand.cpp
 )
 
 target_link_libraries(vcs cryptopp)
