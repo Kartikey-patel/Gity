@@ -2,23 +2,27 @@
 
 A simplified Git-like Version Control System written in **C++17** to understand how modern version control systems work internally.
 
-Instead of using Git as a black box, this project recreates some of its core concepts from scratch, including object storage, staging, commits, and commit history traversal.
+Instead of using Git as a black box, this project recreates some of Git's core concepts from scratch, including object storage, staging, commits, commit history traversal, and repository status.
 
 ---
 
-## Features
+# Features
 
 - Repository initialization (`init`)
 - File staging (`add`)
 - Commit creation (`commit`)
 - Commit history (`log`)
+- Repository status (`status`)
+  - Staged files
+  - Modified files
+  - Untracked files
 - SHA-1 based object storage
 - Persistent staging index
-- Git-inspired object database
+- Git-inspired content-addressable object database
 
 ---
 
-## Project Structure
+# Project Structure
 
 ```
 .vcs/
@@ -34,18 +38,18 @@ Instead of using Git as a black box, this project recreates some of its core con
 
 ### Directory Description
 
-| File/Directory | Purpose |
-|---------------|---------|
-| objects/ | Stores blobs, trees and commits |
+| File / Directory | Purpose |
+|------------------|---------|
+| objects/ | Stores blob, tree and commit objects |
 | refs/main | Stores the latest commit hash |
 | HEAD | Points to the current branch |
-| index | Stores staged files |
+| index | Stores the staging area |
 
 ---
 
-## Commands
+# Commands
 
-### Initialize Repository
+## Initialize Repository
 
 ```bash
 vcs init
@@ -55,85 +59,105 @@ Creates the `.vcs` directory and initializes the repository.
 
 ---
 
-### Stage a File
+## Stage a File
 
 ```bash
 vcs add <file>
 ```
 
-Reads the file, generates its SHA-1 hash, stores it as a blob object and records it in the staging index.
+Reads the file, computes its SHA-1 hash, stores it as a blob object, and records it in the staging index.
 
 ---
 
-### Create a Commit
+## Create a Commit
 
 ```bash
 vcs commit "Commit message"
 ```
 
-Creates a tree from all staged files, creates a commit object and updates the HEAD reference.
+Creates a tree object from all staged files, creates a commit object, updates the current branch, and clears the staging area.
 
 ---
-/**
- * @class Repository
- * @brief Initializes the version control repository.
- *
- * Responsible for creating the directory structure required
- * for the VCS, including object storage, references, HEAD,
- * and the staging index.
- */
-### View Commit History
+
+## View Commit History
 
 ```bash
 vcs log
 ```
 
-Traverses commits starting from HEAD by following parent hashes.
+Traverses commits starting from `HEAD` by following parent commit hashes.
 
 ---
 
-## Internal Architecture
+## Repository Status
 
+```bash
+vcs status
 ```
-Working Directory
-        │
-        ▼
-AddCommand
-        │
-        ▼
-Hasher
-        │
-        ▼
-ObjectStore
-        │
-        ▼
-Index
-        │
-        ▼
-CommitCommand
-        │
-        ▼
-Tree
-        │
-        ▼
-Commit
+
+Displays the current repository state:
+
+- Staged files
+- Modified files
+- Untracked files
+
+---
+
+# Example Workflow
+
+```bash
+vcs init
+
+vcs add hello.txt
+
+vcs commit "Initial commit"
+
+vcs log
+
+vcs status
 ```
 
 ---
 
-## Object Storage
+# Internal Architecture
 
-Objects are stored using their SHA-1 hash.
+```
+                 CLI
+                  │
+                  ▼
+        +-------------------+
+        |  Command Classes  |
+        +-------------------+
+        │
+        ├── AddCommand
+        ├── CommitCommand
+        ├── LogCommand
+        └── StatusCommand
+                  │
+                  ▼
+          Core Components
+        ├── Repository
+        ├── Index
+        ├── ObjectStore
+        ├── Tree
+        ├── Commit
+        ├── Hasher
+        └── FileUtils
+```
 
-Example:
+---
 
-Hash
+# Object Storage
+
+Objects are stored using a Git-inspired content-addressable storage model.
+
+Example SHA-1:
 
 ```
 aaf4c61ddcc5e8a2dabede0f3b482cd9aea9434d
 ```
 
-Stored as
+Stored as:
 
 ```
 objects/
@@ -141,13 +165,13 @@ objects/
     └── f4c61ddcc5e8a2dabede0f3b482cd9aea9434d
 ```
 
-Splitting the hash prevents thousands of files from being stored inside a single directory.
+Using the first two characters as the directory name prevents thousands of files from accumulating inside a single directory.
 
 ---
 
-## Commit Format
+# Commit Format
 
-Each commit is serialized as
+Each commit is serialized as:
 
 ```
 tree <treeHash>
@@ -156,46 +180,50 @@ time <timestamp>
 message <commit message>
 ```
 
-The initial commit does not contain a parent entry.
+The initial commit omits the `parent` field.
 
 ---
 
-## Technologies Used
+# Technologies Used
 
 - C++17
-- std::filesystem
-- Crypto++ (SHA-1)
+- `std::filesystem`
+- Crypto++
 - CMake
 
 ---
 
-## Future Improvements
+# Future Improvements (Version 2)
 
-- [ ] status
-- [ ] checkout
-- [ ] branch
-- [ ] merge
-- [ ] restore
-- [ ] tags
-- [ ] delta compression
+- [ ] Repository discovery
+- [ ] Multiple file staging
+- [ ] `add .`
+- [ ] `.vcsignore`
+- [ ] Checkout
+- [ ] Branching
+- [ ] Merge
+- [ ] Restore
+- [ ] Tags
+- [ ] Delta compression
 
 ---
 
-## Learning Objectives
+# Learning Objectives
 
-This project was built to understand the internal working of Git, including:
+This project was built to understand the internal implementation of Git, including:
 
 - Content-addressable storage
 - SHA-1 hashing
 - Blob, Tree and Commit objects
-- Staging Area
+- Staging area
 - Commit history traversal
+- Repository status detection
 - File serialization
 - Filesystem operations in C++
 
 ---
 
-## Author
+# Author
 
 **Kartikey Patel**
 
