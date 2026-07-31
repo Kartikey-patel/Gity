@@ -78,3 +78,15 @@ void Index::addEntry(const std::string& hash,const std::filesystem::path& filePa
 std::vector<IndexEntry> Index::getStagedEntries(){
     return loadEntries();
 }
+
+
+std::vector<IndexEntry> Index::getEntries()
+{
+    return loadEntries();
+}
+
+//clears the staging area after the commit
+void Index::clear()
+{
+    saveEntries({});
+}

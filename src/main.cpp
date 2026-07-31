@@ -5,6 +5,7 @@
 #include "AddCommand.h"
 #include "CommitCommand.h"
 #include "LogCommand.h"
+#include "StatusCommand.h"
 
 int main(int argc, char* argv[])
 {
@@ -12,12 +13,14 @@ int main(int argc, char* argv[])
     if (argc < 2)
     {
         std::cout << "Usage:\n";
-        std::cout << "  vcs init\n";
-        std::cout << "  vcs add <file>\n";
-        std::cout << "  vcs commit <message>\n";
+        std::cout << "  ./vcs init\n";
+        std::cout << "  ./vcs add <file>\n";
+        std::cout << "  ./vcs commit <message>\n";
+        std::cout << "  ./vcs log\n";
+        std::cout << "  ./vcs status\n";
         return 1;
     }
-
+ 
     std::string command = argv[1];
 
     std::filesystem::path vcsDirectory = ".vcs";
@@ -57,6 +60,10 @@ int main(int argc, char* argv[])
     {
         LogCommand logCommand(vcsDirectory);
         logCommand.execute();
+    }
+    else if(command == "status"){
+        StatusCommand st(vcsDirectory);
+        st.execute();
     }
     else
     {

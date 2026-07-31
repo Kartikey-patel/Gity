@@ -62,4 +62,8 @@ public:
      */
     void addEntry(const std::string& hash, const std::filesystem::path& filePath);
 
+    // public getter to access loadEntries
+    std::vector<IndexEntry> getEntries();
+
+    void clear();
 };

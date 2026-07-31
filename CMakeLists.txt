@@ -18,6 +18,8 @@ add_executable(vcs
     src/Commit.cpp
     src/CommitCommand.cpp
     src/LogCommand.cpp
+    src/StatusCommand.cpp
+    src/FileUtils.cpp
 )
 
 target_link_libraries(vcs cryptopp)
