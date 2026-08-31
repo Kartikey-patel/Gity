@@ -75,11 +75,6 @@ void Index::addEntry(const std::string& hash,const std::filesystem::path& filePa
     saveEntries(entries);
 }
 
-std::vector<IndexEntry> Index::getStagedEntries(){
-    return loadEntries();
-}
-
-
 std::vector<IndexEntry> Index::getEntries()
 {
     return loadEntries();

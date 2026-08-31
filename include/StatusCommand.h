@@ -2,6 +2,7 @@
 
 #include "Hasher.h"
 #include "Index.h"
+#include "IgnoreManager.h"
 
 /**
  * @class StatusCommand
@@ -16,6 +17,7 @@ class StatusCommand{
 private:
     Hasher hasher;
     Index index;
+    IgnoreManager ignoreManager;
     
     std::filesystem::path vcsDirectory;
 
@@ -25,12 +27,12 @@ private:
 
     void printModifiedFiles(const std::vector<IndexEntry>& entries);
 
+    void printDeletedFiles(const std::vector<IndexEntry>& entries);
+
     void printUntrackedFiles(const std::vector<IndexEntry>& entries,const std::vector<std::filesystem::path>& workingFiles);
 
 public:
     explicit StatusCommand(const std::filesystem::path& vcsDirectory);
-
-    std::vector<std::filesystem::path> scanWorkingDirectory() const;
 
     void execute();
 };

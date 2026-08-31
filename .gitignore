@@ -1,6 +1,6 @@
 # Build directory
 build/
-.vcs/
+.gity/
 
 # CMake generated files
 CMakeCache.txt

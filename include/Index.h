@@ -49,11 +49,6 @@ public:
     explicit Index(const std::filesystem::path& indexPath);
 
     /**
-     * Returns all currently staged files.
-     */
-    std::vector<IndexEntry> getStagedEntries();
-
-    /**
      * Adds a file to the staging area.
      *
      * If the file already exists in the index,

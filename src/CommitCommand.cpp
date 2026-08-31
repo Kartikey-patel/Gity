@@ -40,7 +40,7 @@ std::string CommitCommand::getParentCommitHash()const{
 void CommitCommand::execute(const std::string& message){
 
     // Load all staged files from the index.
-    auto entries = index.getStagedEntries();
+    auto entries = index.getEntries();
 
     if (entries.empty())
     {

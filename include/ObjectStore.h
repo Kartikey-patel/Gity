@@ -6,7 +6,7 @@
  * @class ObjectStore
  * @brief Manages storage and retrieval of VCS objects.
  *
- * Objects are stored inside the .vcs/objects directory using
+ * Objects are stored inside the .gity/objects directory using
  * their SHA-1 hash as the identifier.
  *
  * Layout:
@@ -23,6 +23,8 @@
 class ObjectStore{
     private:
         std::filesystem::path objectDirectory;
+
+        bool isValidHash(const std::string& hash)const;
     public:
 
         /**

@@ -1,14 +1,14 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(VersionControl)
+project(Gity)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-include_directories(include)
+add_executable(gity
 
-add_executable(vcs
     src/main.cpp
+
     src/Repository.cpp
     src/ObjectStore.cpp
     src/Hasher.cpp
@@ -20,6 +20,13 @@ add_executable(vcs
     src/LogCommand.cpp
     src/StatusCommand.cpp
     src/FileUtils.cpp
+    src/IgnoreManager.cpp
 )
 
-target_link_libraries(vcs cryptopp)
+target_include_directories(gity PRIVATE include)
+
+target_link_libraries(gity cryptopp)
+
+install(TARGETS gity
+    RUNTIME DESTINATION bin
+)

@@ -1,6 +1,8 @@
 #include "LogCommand.h"
 #include<fstream>
 #include<iostream>
+#include<iomanip>
+#include<ctime>
 
 LogCommand::LogCommand(const std::filesystem::path& vcsDirectory)
     :vcsDirectory(vcsDirectory),
@@ -88,7 +90,13 @@ std::string LogCommand::printCommit(const std::string& commitHash){
 
     // Display the commit information.
     std::cout <<"commit:" << commitHash <<'\n';
-    std::cout <<"Date:" << time <<'\n';
+    if(!time.empty()){
+        std::time_t timestamp = std::stoll(time);
+        std::cout << "Date: " << std::put_time(std::localtime(&timestamp), "%a %b %d %H:%M:%S %Y") << '\n';
+    }
+    else{
+        std::cout << "Date: Unknown";
+    }
     std::cout <<"\n";
     std::cout <<"     " << message <<"\n\n"; 
 

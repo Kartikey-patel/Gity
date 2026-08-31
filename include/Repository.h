@@ -4,7 +4,7 @@
  * @class Repository
  * @brief Initializes a new version control repository.
  *
- * Creates the .vcs directory structure,
+ * Creates the .gity directory structure,
  * initializes HEAD,
  * and creates an empty staging index.
  */

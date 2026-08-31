@@ -5,6 +5,7 @@
 #include "Hasher.h"
 #include "ObjectStore.h"
 #include "Index.h"
+#include "IgnoreManager.h"
 
 /**
  * @class AddCommand
@@ -21,7 +22,11 @@ class AddCommand{
 private:
     Hasher hasher;
     ObjectStore objectStore;
+    IgnoreManager ignoreManager;
+    
     Index  index;
+
+    void addFile(const std::filesystem::path& filePath);
 
 public:
 

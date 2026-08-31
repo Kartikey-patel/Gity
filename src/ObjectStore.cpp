@@ -1,5 +1,7 @@
 #include "ObjectStore.h"
 #include <fstream>
+#include <cctype>
+#include <stdexcept>
 
 ObjectStore::ObjectStore(const std::filesystem::path& objectDirectory){   
     this->objectDirectory = objectDirectory;
@@ -9,6 +11,11 @@ std::filesystem::path ObjectStore::getObjectPath(const std::string& hash){
 // Git stores objects by splitting the SHA-1 hash.
 // This prevents thousands of files from accumulating
 // inside a single directory.
+
+    if (!isValidHash(hash))
+    {
+        throw std::invalid_argument("Invalid SHA-1 hash");
+    }
 
     std::string dir = hash.substr(0,2);
     std::string file = hash.substr(2);
@@ -58,3 +65,16 @@ std::string ObjectStore::loadObject(const std::string& hash){
     // Return the serialized object.
     return buffer.str();
 }    
+
+
+bool ObjectStore::isValidHash(const std::string& hash)const{
+    if(hash.length() != 40){
+        return false;
+    }
+    for(char c : hash){
+        if(!std::isxdigit(static_cast<unsigned char>(c))){
+            return false;
+        }
+    }
+    return true;
+}

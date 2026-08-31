@@ -7,23 +7,39 @@
 #include "LogCommand.h"
 #include "StatusCommand.h"
 
+void printUsage(){
+    std::cout << "Usage:\n"
+              << "  gity init\n"
+              << "  gity add <file>...\n"
+              << "  gity commit <message>\n"
+              << "  gity log\n"
+              << "  gity status\n";
+}
+
+std::string buildCommitMessage(int argc, char* argv[]){
+    std::string message;
+    
+    for(int i = 2; i < argc; i++){
+        if(!message.empty()){
+            message += ' ';
+        }
+        message += argv[i];
+    }
+    return message;
+}
+
 int main(int argc, char* argv[])
 {
     // Dispatch the requested command.
     if (argc < 2)
     {
-        std::cout << "Usage:\n";
-        std::cout << "  ./vcs init\n";
-        std::cout << "  ./vcs add <file>\n";
-        std::cout << "  ./vcs commit <message>\n";
-        std::cout << "  ./vcs log\n";
-        std::cout << "  ./vcs status\n";
+        printUsage();
         return 1;
     }
  
     std::string command = argv[1];
 
-    std::filesystem::path vcsDirectory = ".vcs";
+    std::filesystem::path vcsDirectory = ".gity";
 
     // Initialize a new repository.
     if (command == "init")
@@ -36,24 +52,30 @@ int main(int argc, char* argv[])
     {
         if (argc < 3)
         {
-            std::cout << "Usage: vcs add <file>\n";
+            std::cerr << "Error: no file specified.\n";
+            printUsage();
             return 1;
         }
 
         AddCommand add(vcsDirectory);
-        add.execute(argv[2]);
+        
+        for(int i = 2; i < argc; i++){
+            add.execute(argv[i]);
+        }
     }
     // Create a new commit.
     else if (command == "commit")
     {
         if (argc < 3)
         {
-            std::cout << "Usage: vcs commit <message>\n";
+            std::cerr << "Error: commit message is required.\n";
+            printUsage();
             return 1;
         }
 
         CommitCommand commit(vcsDirectory);
-        commit.execute(argv[2]);
+        std::string message = buildCommitMessage(argc, argv);
+        commit.execute(message);
     }
     // Display the commit history.
     else if(command == "log")
@@ -67,7 +89,8 @@ int main(int argc, char* argv[])
     }
     else
     {
-        std::cout << "Unknown command: " << command << '\n';
+        std::cerr << "Unknown command: '" << command << "'.\n";
+        printUsage();
         return 1;
     }
 

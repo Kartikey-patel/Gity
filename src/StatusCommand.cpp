@@ -3,10 +3,12 @@
 #include "Hasher.h"
 #include <vector>
 #include<unordered_set>
+#include<iostream>
 
 StatusCommand::StatusCommand(const std::filesystem::path& vcsDirectory)
     :   index(vcsDirectory/ "index"),
-        vcsDirectory(vcsDirectory)
+        vcsDirectory(vcsDirectory),
+        ignoreManager(vcsDirectory.parent_path())
 {
 }
 
@@ -39,9 +41,12 @@ void StatusCommand::printModifiedFiles(const std::vector<IndexEntry>& entries){
         if(!std::filesystem::exists(filePath)){
             continue;
         }
-        const auto contents = FileUtils::readFile(filePath);
-        const auto currentHash = hasher.sha1(contents);
+        auto contents = FileUtils::readFile(filePath);
+        if(!contents){
+            continue;
+        }
 
+        const auto currentHash = hasher.sha1(*contents);
         
         if (currentHash != entry.hash){
             if (!hasModified)
@@ -56,42 +61,23 @@ void StatusCommand::printModifiedFiles(const std::vector<IndexEntry>& entries){
 }
 
 
-void StatusCommand::execute()
-{
-    std::cout << "On branch main\n\n";
+void StatusCommand::printDeletedFiles(const std::vector<IndexEntry>& entries){
+    bool hashDeleted = false;
+    for(const auto& entry : entries){
+        auto filePath = getWorkingFilePath(entry);
 
-    auto entries = index.getEntries();
-    auto workingFiles = scanWorkingDirectory();
-
-    printStagedFiles(entries);
-    printModifiedFiles(entries);
-    printUntrackedFiles(entries,workingFiles);
-}
-
-
-std::vector<std::filesystem::path> StatusCommand::scanWorkingDirectory()const{
-
-    auto projectRoot = std::filesystem::current_path();
-
-    std::vector<std::filesystem::path> workingFiles;
-
-    for(const auto& entry : std::filesystem::recursive_directory_iterator(projectRoot)){
-        if(!entry.is_regular_file()){
-            continue;
+        if(!std::filesystem::exists(filePath)){
+            if(!hashDeleted){
+                std::cout << "\n Deleted files\n";
+                hashDeleted = true;
+            }
+            std::cout << "  " << entry.filePath << '\n';
         }
-
-        auto relativePath = std::filesystem::relative(entry.path(),projectRoot);
-
-        auto first = relativePath.begin();
-
-        if (first != relativePath.end() && (*first == ".vcs" || *first == ".git" || *first == "build"))
-        {
-            continue;
-        }
-        workingFiles.push_back(relativePath);
     }
-    return workingFiles;
 }
+
+
+
 
 void StatusCommand::printUntrackedFiles(const std::vector<IndexEntry>& entries,const std::vector<std::filesystem::path>& workingFiles){
     std::unordered_set<std::filesystem::path> trackedFiles;
@@ -115,3 +101,18 @@ void StatusCommand::printUntrackedFiles(const std::vector<IndexEntry>& entries,c
         }
     }
 }
+
+
+void StatusCommand::execute()
+{
+    std::cout << "On branch main\n\n";
+
+    auto entries = index.getEntries();
+    auto workingFiles =FileUtils::getFilesRecursively(std::filesystem::current_path(),ignoreManager);
+
+    printStagedFiles(entries);
+    printModifiedFiles(entries);
+    printDeletedFiles(entries);
+    printUntrackedFiles(entries,workingFiles);
+}
+
