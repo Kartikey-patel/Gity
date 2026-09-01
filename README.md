@@ -2,88 +2,59 @@
 
 A Git-inspired Version Control System written in **C++17**, built from scratch to understand how modern version control systems work internally.
 
-Instead of using Git as a black box, Gity recreates core version control concepts including content-addressable object storage, staging, commits, commit history traversal, repository status, and ignore rules.
-
----
+Gity focuses on useful local version-control functionality rather than reproducing every Git command.
 
 ## Features
 
 - Repository initialization (`init`)
 - File staging (`add`)
-- Directory and recursive staging
-- Stage all files using `add .`
+- Recursive directory staging
+- Stage all files with `add .`
 - Commit creation (`commit`)
 - Commit history (`log`)
 - Repository status (`status`)
-  - Staged files
-  - Modified files
-  - Deleted files
+  - Staged new files
+  - Staged modifications
+  - Staged deletions
+  - Unstaged modifications
+  - Unstaged deletions
   - Untracked files
+- Three-state comparison of `HEAD`, Index, and Working Tree
 - `.gityignore` support
-  - Exact file patterns
-  - Directory patterns
-  - Wildcard suffix patterns such as `*.log`
-  - Comments and blank lines
-- SHA-1 based object storage
+- SHA-1 based object identification
 - Persistent staging index
-- Git-inspired content-addressable object database
-- Automatic protection of `.gity/` and `.git/`
-- Installable command-line executable
-- CMake-based build system
-
----
+- Content-addressable object storage
+- Blob, Tree, and Commit objects
+- CMake build system
+- Installable `gity` command
 
 ## Requirements
 
 - C++17 compatible compiler
-- CMake 3.16 or later
+- CMake 3.16+
 - Crypto++
 
----
-
 ## Installation
-
-### Clone the repository
 
 ```bash
 git clone https://github.com/Kartikey-patel/Gity.git
 cd Gity
-```
 
-### Build Gity
-
-```bash
 cmake -S . -B build -DCMAKE_INSTALL_PREFIX="$HOME/.local"
 cmake --build build
-```
-
-### Install Gity
-
-```bash
 cmake --install build
 ```
 
-Make sure `$HOME/.local/bin` is included in your `PATH`.
-
-Verify the installation:
+Ensure `$HOME/.local/bin` is in your `PATH`.
 
 ```bash
 which gity
-```
-
-Then run:
-
-```bash
 gity
 ```
 
-Gity can now be used from any directory.
-
----
-
 ## Repository Structure
 
-When a repository is initialized, Gity creates a `.gity` directory:
+After `gity init`:
 
 ```text
 .gity/
@@ -97,117 +68,130 @@ When a repository is initialized, Gity creates a `.gity` directory:
 └── index
 ```
 
-### Directory Description
-
 | File / Directory | Purpose |
-|------------------|---------|
-| `objects/` | Stores blob, tree and commit objects |
+|---|---|
+| `objects/` | Stores Blob, Tree, and Commit objects |
 | `refs/main` | Stores the latest commit hash |
 | `HEAD` | Points to the current branch |
-| `index` | Stores the staging area |
+| `index` | Persistent staging area |
 
----
+## Commands
 
-# Commands
-
-## Initialize a Repository
+### Initialize
 
 ```bash
 gity init
 ```
 
-Creates the `.gity` directory and initializes the repository.
+Creates and initializes a `.gity` directory.
 
----
-
-## Stage a File
+### Stage a File
 
 ```bash
 gity add <file>
 ```
 
-Reads the file, computes its SHA-1 hash, stores it as a blob object, and records it in the staging index.
+The file is read, hashed, stored as a Blob object, and added to the staging index.
 
-Example:
-
-```bash
-gity add hello.txt
-```
-
----
-
-## Stage a Directory
+### Stage a Directory
 
 ```bash
 gity add <directory>
 ```
 
-Recursively stages files inside the specified directory.
+Recursively stages files while respecting `.gityignore`.
 
-Example:
-
-```bash
-gity add src/
-```
-
----
-
-## Stage All Files
+### Stage Everything
 
 ```bash
 gity add .
 ```
 
-Recursively stages files in the repository while respecting `.gityignore`.
+Stages repository files while respecting ignore rules. Previously tracked files that have been deleted are also staged for deletion.
 
-The `.gity/` and `.git/` directories are always ignored.
-
----
-
-## Create a Commit
+### Commit
 
 ```bash
 gity commit "Commit message"
 ```
 
-Creates a tree object from the staged files, creates a commit object, updates the current branch, and clears the staging area.
+Creates a Tree from the staging index, creates a Commit object, updates `refs/main`, and clears the index.
 
-Example:
+A commit contains:
 
-```bash
-gity commit "Initial commit"
-```
+- Tree hash
+- Parent commit hash
+- Timestamp
+- Commit message
 
----
-
-## View Commit History
+### Log
 
 ```bash
 gity log
 ```
 
-Traverses commits starting from `HEAD` by following parent commit hashes.
+Starts from `HEAD` and follows parent commit hashes backwards.
 
----
-
-## Repository Status
+### Status
 
 ```bash
 gity status
 ```
 
-Displays the current repository state:
+Gity compares:
 
-- Staged files
-- Modified files
-- Deleted files
-- Untracked files
+```text
+HEAD
+ │
+ ▼
+Index
+ │
+ ▼
+Working Tree
+```
 
----
+Example:
 
-# `.gityignore`
+```text
+On branch main
 
-Gity provides a simplified ignore system through a `.gityignore` file.
+Changes to be committed:
+  new file: "new.txt"
+  modified: "src/main.cpp"
+  deleted: "old.txt"
+
+Changes not staged for commit:
+  modified: "README.md"
+  deleted: "temp.txt"
+
+Untracked files:
+  test.txt
+```
+
+A clean repository reports:
+
+```text
+On branch main
+
+nothing to commit, working tree clean
+```
+
+### Status State Model
+
+| HEAD | Index | Working Tree | Meaning |
+|---|---|---|---|
+| absent | present | present | Staged new file |
+| present | changed | changed | Staged modification |
+| present | absent | absent | Staged deletion |
+| present | present | changed | Unstaged modification |
+| present | present | absent | Unstaged deletion |
+| absent | absent | present | Untracked file |
+
+This three-state model is the basis of `gity status`.
+
+## `.gityignore`
+
+Gity supports a simplified ignore system.
 
 Example:
 
@@ -223,147 +207,53 @@ build/
 secret.txt
 ```
 
-Files matching `.gityignore` rules are excluded from:
+Ignored files are excluded from staging and untracked-file detection.
 
-- Staging
-- Untracked-file detection
+Supported patterns include:
 
-The `.gity` and `.git` directories are always ignored automatically.
+- Exact file names
+- Directory patterns
+- Suffix wildcards such as `*.log`
+- Comments
+- Blank lines
 
-## Supported Ignore Patterns
+`.gity/` and `.git/` are automatically ignored.
 
-### Exact File
+> Gity intentionally implements simplified ignore semantics rather than complete Git-compatible `.gitignore` behavior.
 
-```text
-secret.txt
-```
-
-### Directory
-
-```text
-build/
-```
-
-The directory and its contents are ignored.
-
-### Wildcard Suffix
-
-```text
-*.log
-```
-
-Ignores files ending in `.log`.
-
-### Comments
-
-Lines beginning with `#` are treated as comments.
-
-### Blank Lines
-
-Blank lines are ignored.
-
-> Gity currently implements a simplified ignore-pattern system and does not provide complete Git-compatible `.gitignore` semantics.
-
----
-
-# Example Workflow
-
-Initialize a repository:
+## Example Workflow
 
 ```bash
+mkdir demo
+cd demo
+
 gity init
-```
 
-Create or modify files:
-
-```bash
 echo "Hello Gity" > hello.txt
-```
 
-Stage the file:
-
-```bash
+gity status
 gity add hello.txt
-```
-
-Create a commit:
-
-```bash
 gity commit "Initial commit"
-```
 
-View the history:
-
-```bash
 gity log
-```
-
-Check repository status:
-
-```bash
 gity status
 ```
 
----
-
-## Example Using `.gityignore`
-
-Create a `.gityignore` file:
-
-```text
-build/
-*.log
-secret.txt
-```
-
-Then:
+Modify the file:
 
 ```bash
-gity add .
+echo "Updated content" > hello.txt
+gity status
 ```
 
-Ignored files will not be staged.
-
-For example:
-
-```text
-project/
-├── .gity/
-├── .gityignore
-├── README.md
-├── src/
-│   └── main.cpp
-├── build/
-│   └── generated.o
-├── debug.log
-└── secret.txt
-```
-
-Running:
+Stage and commit:
 
 ```bash
-gity add .
+gity add hello.txt
+gity commit "Update hello.txt"
 ```
 
-will stage:
-
-```text
-.gityignore
-README.md
-src/main.cpp
-```
-
-while ignoring:
-
-```text
-build/
-debug.log
-secret.txt
-```
-
----
-
-# Internal Architecture
+## Internal Architecture
 
 ```text
                          CLI
@@ -405,102 +295,91 @@ secret.txt
                     .gityignore
 ```
 
----
+## Core Components
 
-# Core Components
+### Repository
 
-## Repository
+Initializes the repository and manages:
 
-Responsible for repository initialization and repository metadata such as:
-
+- `.gity/`
 - `HEAD`
 - `refs/main`
 - `index`
 - `objects/`
 
-## ObjectStore
+### ObjectStore
 
-Implements Git-inspired content-addressable storage.
+Provides content-addressable object storage:
 
-Objects are identified using SHA-1 hashes and stored inside the `.gity/objects` directory.
+- Object path generation
+- Object existence checks
+- Object storage
+- Object loading
 
-## Hasher
+Objects are identified by SHA-1 hashes.
 
-Generates SHA-1 hashes for file and object contents.
+### Hasher
 
-## Index
+Generates SHA-1 hashes for file contents and serialized objects.
 
-Maintains the persistent staging area.
+### Index
 
-Each index entry associates a repository-relative file path with the SHA-1 hash of its contents.
+Maintains the persistent staging area:
 
-## AddCommand
+```text
+file path → SHA-1 hash
+```
 
-Handles file and directory staging.
+### AddCommand
 
-It:
+Reads files, hashes them, stores Blob objects, updates the index, handles staged deletions, and applies ignore rules.
 
-1. Reads files
-2. Calculates SHA-1 hashes
-3. Stores blob objects
-4. Updates the staging index
-5. Applies `.gityignore` rules
+### Tree
 
-## Commit
+Represents a snapshot of the staged files. Tree entries are serialized deterministically and stored as objects.
 
-Represents a commit object containing:
+### Commit
 
-- Tree hash
-- Parent commit hash
-- Timestamp
-- Commit message
+Represents a committed snapshot containing a Tree hash, optional parent hash, timestamp, and message.
 
-## Tree
+### CommitCommand
 
-Represents the directory/file structure of a committed snapshot.
+Creates the commit chain:
 
-## CommitCommand
+```text
+Index
+  │
+  ▼
+Tree
+  │
+  ▼
+Commit
+  │
+  ▼
+HEAD / refs/main
+```
 
-Creates tree and commit objects from the staged index and updates the current branch reference.
+### LogCommand
 
-## LogCommand
+Traverses commit history by following parent hashes.
 
-Traverses the commit history by following parent commit hashes.
+### StatusCommand
 
-## StatusCommand
+Builds maps for `HEAD`, Index, and Working Tree and compares file presence and SHA-1 hashes to detect staged, unstaged, deleted, and untracked states.
 
-Compares the staging index with the current working tree to detect:
+### FileUtils
 
-- Staged files
-- Modified files
-- Deleted files
-- Untracked files
+Provides file reading and recursive filesystem traversal.
 
-It also respects `.gityignore`.
+### IgnoreManager
 
-## FileUtils
+Loads and evaluates `.gityignore` rules and is shared by staging and status operations.
 
-Provides reusable filesystem functionality including:
+## Object Storage
 
-- File reading
-- Recursive filesystem traversal
-- Ignore-aware file discovery
+Gity uses Git-inspired **content-addressable storage**.
 
-## IgnoreManager
-
-Loads and evaluates `.gityignore` rules.
-
-It is shared by staging and status operations so that ignored files are treated consistently throughout the system.
-
----
-
-# Object Storage
-
-Gity uses a Git-inspired **content-addressable storage** model.
-
-Each object is identified by the SHA-1 hash of its contents.
-
-Example:
+For example:
 
 ```text
 aaf4c61ddcc5e8a2dabede0f3b482cd9aea9434d
@@ -514,31 +393,9 @@ objects/
     └── f4c61ddcc5e8a2dabede0f3b482cd9aea9434d
 ```
 
-The first two characters of the SHA-1 hash are used as the directory name.
+The first two hash characters form the directory name.
 
-This prevents thousands of objects from accumulating inside a single directory.
-
----
-
-# Object Types
-
-Gity currently uses three major object types:
-
-```text
-Blob
- │
- └── Stores file contents
-
-Tree
- │
- └── Represents the repository file structure
-
-Commit
- │
- └── Represents a committed snapshot
-```
-
-The relationship can be visualized as:
+## Object Model
 
 ```text
 Commit
@@ -548,28 +405,16 @@ Commit
   │
   ├── Blob → file1
   ├── Blob → file2
-  └── Tree
-       └── Blob → file3
+  └── Blob → file3
 ```
 
----
+- **Blob** — stores file contents
+- **Tree** — represents a snapshot of staged files
+- **Commit** — represents a committed snapshot
 
-# Commit Format
+## Commit History
 
-Each commit is serialized using a simple text-based format:
-
-```text
-tree <treeHash>
-parent <parentHash>
-time <timestamp>
-message <commit message>
-```
-
-The initial commit does not contain a `parent` field.
-
-Subsequent commits reference the previous commit through the `parent` field.
-
-This creates a linked history:
+Each commit stores the hash of its parent:
 
 ```text
 Commit C
@@ -581,77 +426,26 @@ Commit B
 Commit A
 ```
 
----
+`gity log` starts at `HEAD` and follows this chain backwards.
 
-# Staging Model
+## Development Philosophy
 
-Gity uses a persistent staging index.
+Gity is not intended to become a copy of every Git feature.
 
-The basic workflow is:
+Features are added when they provide meaningful value to a practical local version-control system or demonstrate an important version-control concept.
 
-```text
-Working Tree
-     │
-     │ gity add
-     ▼
-   Index
-     │
-     │ gity commit
-     ▼
-  Commit
-```
+The project prioritizes:
 
-When a file is staged:
+- Understandable architecture
+- Correctness
+- Practical usefulness
+- Persistent data structures
+- Clear separation of responsibilities
+- Features that can be clearly explained in technical interviews
 
-```text
-file contents
-      │
-      ▼
-    SHA-1
-      │
-      ▼
-    Blob
-      │
-      ▼
-    Index
-```
+## Current Development Status
 
-This separates the current working state from the next committed snapshot.
-
----
-
-# Branch References
-
-Gity currently initializes a default branch called `main`.
-
-`HEAD` points to the current branch:
-
-```text
-HEAD
- │
- ▼
-refs/main
- │
- ▼
-commit hash
-```
-
-The `refs/main` file stores the hash of the latest commit on the branch.
-
----
-
-# Technologies Used
-
-- **C++17**
-- `std::filesystem`
-- **Crypto++**
-- **CMake**
-
----
-
-# Current Development Status
-
-Gity currently implements the core functionality of a small Git-inspired version control system:
+The current core includes:
 
 - Repository initialization
 - SHA-1 hashing
@@ -660,98 +454,80 @@ Gity currently implements the core functionality of a small Git-inspired version
 - Tree objects
 - Commit objects
 - Persistent staging index
-- File staging
-- Directory staging
+- File and directory staging
 - `add .`
+- Staged deletions
 - Commit history
-- Repository status
-- Deleted-file detection
-- Ignore rules through `.gityignore`
-- Shared filesystem traversal
-- Installable command-line executable
+- Three-state repository status
+- Untracked-file detection
+- `.gityignore`
+- Filesystem traversal
+- Installable executable
+- CMake build system
 
-The project is still under active development and is intentionally focused on understanding the internal mechanisms behind version control systems.
+The goal is to validate Gity by using it to track real projects before expanding the system further.
 
----
+## Future Improvements
 
-# Future Improvements
-
-The following features are planned for future versions:
+Potential future work includes:
 
 - [ ] Repository discovery from subdirectories
-- [ ] Complete `HEAD → Index → Working Tree` status comparison
+- [ ] More complete ignore-pattern compatibility
+- [ ] Snapshot recovery / `restore`
 - [ ] Checkout
 - [ ] Branching
 - [ ] Merge
-- [ ] Restore
 - [ ] Tags
-- [ ] Delta compression
-- [ ] More complete ignore-pattern compatibility
+- [ ] Improved object management
 - [ ] Automated unit and integration testing
 - [ ] Performance improvements
 - [ ] Remote repository support
-- [ ] GityHub integration
 
----
+Features will be added based on actual usefulness rather than simply matching Git's feature set.
 
-# Roadmap
+## GityHub
+
+Gity is intended to become the local version-control layer for a future project called **GityHub**.
 
 ```text
-Version 1
-    │
-    ├── Repository initialization
-    ├── Object storage
-    ├── Staging
-    ├── Commits
-    ├── Log
-    └── Status
-         │
-         ▼
-Version 1.1
-    │
-    ├── Improved status handling
-    ├── .gityignore
-    ├── Filesystem refactoring
-    ├── .gity metadata directory
-    └── Installable CLI
-         │
-         ▼
-Version 2
-    │
-    ├── Repository discovery
-    ├── Checkout
-    ├── Branching
-    ├── Merge
-    ├── Restore
-    ├── Tags
-    └── Improved object management
-         │
-         ▼
-GityHub
-    │
-    ├── Remote repositories
-    ├── Authentication
-    ├── Repository hosting
-    ├── Push / Pull
-    ├── Collaboration
-    └── Web interface
+                 Gity
+                  │
+                  │ local repository
+                  ▼
+          ┌─────────────────┐
+          │     GityHub     │
+          │                 │
+          │ Remote Hosting  │
+          │ Collaboration   │
+          │ Authentication  │
+          │ Web Interface   │
+          └─────────────────┘
 ```
 
----
+GityHub will provide remote repository hosting and collaboration capabilities on top of the concepts implemented by Gity.
 
-# Why Gity?
+GityHub will be started after Gity has been validated by managing real projects.
 
-Git is extremely powerful, but its internal implementation can be difficult to understand when using it only through its command-line interface.
-
-Gity is an attempt to recreate the fundamental ideas behind a version control system from scratch.
+## Why Gity?
 
 The goal is not to replace Git.
 
 The goal is to understand **how a version control system actually works**.
 
----
+By implementing the system from scratch in C++17, the project explores:
 
-# Author
+- Content-addressable storage
+- Hash-based object identification
+- Persistent staging
+- Snapshot creation
+- Commit history
+- Filesystem traversal
+- Repository state comparison
+- Serialization
+- Ignore rules
+- Separation between working tree, index, and committed state
+
+## Author
 
 **Kartikey Patel**
 
