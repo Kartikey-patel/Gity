@@ -24,3 +24,24 @@ std::string Tree::serialize() const{
     }
     return out.str();
 }
+
+
+std::vector<IndexEntry> Tree::deserialize(const std::string& data){
+    
+    std::vector<IndexEntry> entries;
+
+    std::istringstream in(data);
+    std::string hash;
+    std::filesystem::path filePath;
+
+    while (in >> hash >> filePath)
+    {
+        IndexEntry entry;
+        entry.hash = hash;
+        entry.filePath = filePath;
+
+        entries.push_back(entry);
+    }
+
+    return entries;
+}

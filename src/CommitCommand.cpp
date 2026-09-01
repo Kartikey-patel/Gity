@@ -67,8 +67,7 @@ void CommitCommand::execute(const std::string& message){
     // Move HEAD to the newly created commit.
     updateHead(commitHash);
 
-    // clear the staging area
-    index.clear();
+   
 }
 
 void CommitCommand::updateHead(const std::string& commitHash){

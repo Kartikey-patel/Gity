@@ -7,7 +7,7 @@ ObjectStore::ObjectStore(const std::filesystem::path& objectDirectory){
     this->objectDirectory = objectDirectory;
 }
 
-std::filesystem::path ObjectStore::getObjectPath(const std::string& hash){  
+std::filesystem::path ObjectStore::getObjectPath(const std::string& hash)const{  
 // Git stores objects by splitting the SHA-1 hash.
 // This prevents thousands of files from accumulating
 // inside a single directory.
@@ -24,7 +24,7 @@ std::filesystem::path ObjectStore::getObjectPath(const std::string& hash){
     return filePath;
 }
 
-bool ObjectStore::hasObject(const std::string& hash){  
+bool ObjectStore::hasObject(const std::string& hash)const{  
     
     // Identical objects share the same hash, so
     // there is no need to store duplicate copies.
@@ -48,7 +48,7 @@ void ObjectStore::storeObject(const std::string& hash, const std::string& data){
     file << data;
 }
 
-std::string ObjectStore::loadObject(const std::string& hash){
+std::string ObjectStore::loadObject(const std::string& hash)const{
 
     // Open the object file corresponding to the given hash.
     std::ifstream file(getObjectPath(hash));

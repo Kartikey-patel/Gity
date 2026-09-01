@@ -3,6 +3,9 @@
 #include "Hasher.h"
 #include "Index.h"
 #include "IgnoreManager.h"
+#include "ObjectStore.h"
+
+#include <unordered_map>
 
 /**
  * @class StatusCommand
@@ -18,18 +21,22 @@ private:
     Hasher hasher;
     Index index;
     IgnoreManager ignoreManager;
+    ObjectStore objectStore;
     
     std::filesystem::path vcsDirectory;
 
-    std::filesystem::path getWorkingFilePath(const IndexEntry& entry) const;
+    std::unordered_map<std::filesystem::path, std::string>
+getHeadMap() const;
 
-    void printStagedFiles(const std::vector<IndexEntry>& entries);
+    std::unordered_map<std::filesystem::path, std::string>getWorkingTreeEntries() const;
 
-    void printModifiedFiles(const std::vector<IndexEntry>& entries);
+    std::unordered_map<std::filesystem::path, std::string>
+getIndexMap() const;
 
-    void printDeletedFiles(const std::vector<IndexEntry>& entries);
-
-    void printUntrackedFiles(const std::vector<IndexEntry>& entries,const std::vector<std::filesystem::path>& workingFiles);
+    void compareStates(
+    const std::unordered_map<std::filesystem::path, std::string>& head,
+    const std::unordered_map<std::filesystem::path, std::string>& index,
+    const std::unordered_map<std::filesystem::path, std::string>& working) const;
 
 public:
     explicit StatusCommand(const std::filesystem::path& vcsDirectory);

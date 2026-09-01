@@ -29,3 +29,20 @@ std::string Commit::serialize() const{
     // Return the serialized commit object.
     return out.str();
 }
+
+
+std::string Commit::getTreeHash(const std::string& data)
+{
+    std::istringstream in(data);
+    std::string line;
+
+    while (std::getline(in, line))
+    {
+        if (line.rfind("tree ", 0) == 0)
+        {
+            return line.substr(5);
+        }
+    }
+
+    return {};
+}

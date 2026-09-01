@@ -19,5 +19,5 @@ class Hasher{
      * @param data The input string to hash.
      * @return A 40-character hexadecimal SHA-1 hash.
      */
-        std::string sha1(const std::string& data);
+        std::string sha1(const std::string& data)const;
 };

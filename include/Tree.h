@@ -2,6 +2,7 @@
 #include<vector>
 
 #include "Index.h"
+#include "Tree.h"
 
 /**
  * @class Tree
@@ -30,5 +31,7 @@ public:
      * <hash> <filepath>
      */
     std::string serialize() const;
+
+    static std::vector<IndexEntry> deserialize(const std::string& data);
 
 };

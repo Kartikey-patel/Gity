@@ -42,13 +42,13 @@ class ObjectStore{
          * Path:
          *   objects/aa/f4c61ddcc5e8a2...
          */
-        std::filesystem::path getObjectPath(const std::string& hash);
+        std::filesystem::path getObjectPath(const std::string& hash)const;
 
         /**
          * Checks whether an object with the given hash
          * already exists in the object database.
          */
-        bool hasObject(const std::string& hash);  
+        bool hasObject(const std::string& hash)const;  
 
         /**
          * Stores serialized object data on disk.
@@ -64,5 +64,5 @@ class ObjectStore{
          * This function is used when reconstructing blobs,
          * trees, or commits from the object database.
          */
-        std::string loadObject(const std::string& hash);
+        std::string loadObject(const std::string& hash)const;
 };

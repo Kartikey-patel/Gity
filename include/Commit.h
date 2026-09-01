@@ -31,9 +31,9 @@ public:
      * @param parentHash Hash of the previous commit.
      * @param message Commit message describing the change.
      */
-    Commit(const std::string& message,
-           const std::string& treeHash,
-           const std::string& parentHash);
+    Commit(const std::string& treeHash,
+           const std::string& parentHash,
+           const std::string& message);
 
     /**
      * Serializes the commit into a text representation.
@@ -45,4 +45,6 @@ public:
      * message <text>
      */
     std::string serialize() const;
+
+    static std::string getTreeHash(const std::string& data);
 };

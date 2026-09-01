@@ -1,12 +1,13 @@
 #include "Index.h"
-#include<fstream>
 
+#include<fstream>
+#include<algorithm>
 
 Index::Index(const std::filesystem::path& indexPath)
     : indexPath(indexPath) {}
 
 
-std::vector<IndexEntry> Index::loadEntries(){
+std::vector<IndexEntry> Index::loadEntries()const{
     std::vector<IndexEntry>entries;
 
     // Open the staging index.
@@ -29,7 +30,7 @@ std::vector<IndexEntry> Index::loadEntries(){
     return entries;
 }
 
-void Index::saveEntries(const std::vector<IndexEntry>& entries){
+void Index::saveEntries(const std::vector<IndexEntry>& entries)const{
 
     // Rewrite the index with the updated list of staged files.
     std::ofstream indexFile(indexPath);
@@ -75,13 +76,27 @@ void Index::addEntry(const std::string& hash,const std::filesystem::path& filePa
     saveEntries(entries);
 }
 
-std::vector<IndexEntry> Index::getEntries()
+std::vector<IndexEntry> Index::getEntries()const
 {
     return loadEntries();
 }
 
 //clears the staging area after the commit
-void Index::clear()
+void Index::clear()const
 {
     saveEntries({});
+}
+
+
+void Index::removeEntry(const std::filesystem::path& filePath)
+{
+    auto entries = loadEntries();
+
+    entries.erase(std::remove_if(entries.begin(),entries.end(),[&](const IndexEntry& entry)
+            {
+                return entry.filePath == filePath;
+            }),entries.end()
+    );
+
+    saveEntries(entries);
 }

@@ -33,14 +33,14 @@ private:
      * Each line of the index has the format:
      * <hash> <filepath>
      */
-    std::vector<IndexEntry> loadEntries();
+    std::vector<IndexEntry> loadEntries()const;
 
     /**
      * Writes all staged entries back to the index file.
      *
      * Existing contents are overwritten with the updated staging area.
      */
-    void saveEntries(const std::vector<IndexEntry>& entries);
+    void saveEntries(const std::vector<IndexEntry>& entries)const;
 
 public:
     /**
@@ -57,8 +57,16 @@ public:
      */
     void addEntry(const std::string& hash, const std::filesystem::path& filePath);
 
-    // public getter to access loadEntries
-    std::vector<IndexEntry> getEntries();
+    /**
+     * Removes a file from the staging index.
+     *
+     * Used when a tracked file has been deleted from the
+     * working tree and that deletion is being staged.
+     */
+    void removeEntry(const std::filesystem::path& filePath);
 
-    void clear();
+    // public getter to access loadEntries
+    std::vector<IndexEntry> getEntries()const;
+
+    void clear()const;
 };

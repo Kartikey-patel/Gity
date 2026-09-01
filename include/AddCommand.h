@@ -28,6 +28,8 @@ private:
 
     void addFile(const std::filesystem::path& filePath);
 
+    void removeDeletedFiles(const std::filesystem::path& scope);
+
 public:
 
     /**

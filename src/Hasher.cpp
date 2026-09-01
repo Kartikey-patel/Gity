@@ -4,7 +4,7 @@
 #include <cryptopp/hex.h>
 #include <cryptopp/filters.h>
 
-std::string Hasher::sha1(const std::string& data)
+std::string Hasher::sha1(const std::string& data)const
 {
     // Compute the SHA-1 digest of the input string and
     // encode it as a hexadecimal string.

@@ -43,10 +43,7 @@ void AddCommand::execute(const std::filesystem::path& filePath)
 
     if (std::filesystem::is_regular_file(filePath))
     {
-        auto relativePath =
-            std::filesystem::relative(
-                filePath,
-                std::filesystem::current_path());
+        auto relativePath =std::filesystem::relative(filePath,std::filesystem::current_path());
 
         if (ignoreManager.isIgnored(relativePath))
         {
@@ -65,7 +62,47 @@ void AddCommand::execute(const std::filesystem::path& filePath)
         {
             addFile(file);
         }
+        removeDeletedFiles(filePath);
 
         return;
+    }
+}
+
+void AddCommand::removeDeletedFiles(const std::filesystem::path& scope)
+{
+    auto entries = index.getEntries();
+
+    std::filesystem::path normalizedScope =scope.lexically_normal();
+
+    for (const auto& entry : entries)
+    {
+        auto indexedPath = entry.filePath.lexically_normal();
+
+        bool inScope = false;
+
+        if (normalizedScope == ".")
+        {
+            inScope = true;
+        }
+        else
+        {
+            auto scopeString = normalizedScope.string();
+            auto pathString = indexedPath.string();
+
+            inScope =indexedPath == normalizedScope ||
+                pathString.rfind(scopeString + "/", 0) == 0;
+        }
+
+        if (!inScope)
+        {
+            continue;
+        }
+
+        auto workingPath =std::filesystem::current_path() / indexedPath;
+
+        if (!std::filesystem::exists(workingPath))
+        {
+            index.removeEntry(indexedPath);
+        }
     }
 }
