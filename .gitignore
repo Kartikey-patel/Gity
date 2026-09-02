@@ -1,6 +1,7 @@
 # Build directory
 build/
 .gity/
+.gityignore
 
 # CMake generated files
 CMakeCache.txt

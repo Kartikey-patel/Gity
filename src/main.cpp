@@ -60,7 +60,9 @@ int main(int argc, char* argv[])
         AddCommand add(vcsDirectory);
         
         for(int i = 2; i < argc; i++){
-            add.execute(argv[i]);
+            if(!add.execute(argv[i])){
+                return 1;
+            }
         }
     }
     // Create a new commit.

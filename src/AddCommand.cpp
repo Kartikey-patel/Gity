@@ -32,13 +32,13 @@ void AddCommand::addFile(const std::filesystem::path& filePath){
     index.addEntry(hash,normalized);
 }
 
-void AddCommand::execute(const std::filesystem::path& filePath)
+bool AddCommand::execute(const std::filesystem::path& filePath)
 {
     if (!std::filesystem::exists(filePath))
     {
         std::cerr << "Error: path '" << filePath
                   << "' does not exist.\n";
-        return;
+        return false;
     }
 
     if (std::filesystem::is_regular_file(filePath))
@@ -47,11 +47,11 @@ void AddCommand::execute(const std::filesystem::path& filePath)
 
         if (ignoreManager.isIgnored(relativePath))
         {
-            return;
+            return true;
         }
 
         addFile(filePath);
-        return;
+        return true;
     }
 
     if (std::filesystem::is_directory(filePath))
@@ -64,8 +64,10 @@ void AddCommand::execute(const std::filesystem::path& filePath)
         }
         removeDeletedFiles(filePath);
 
-        return;
+        return true;
     }
+    
+    return false;
 }
 
 void AddCommand::removeDeletedFiles(const std::filesystem::path& scope)

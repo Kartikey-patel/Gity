@@ -43,6 +43,6 @@ public:
      * The file is hashed, stored as a blob,
      * and recorded in the staging index.
      */
-    void execute(const std::filesystem::path& filePath);
+    bool execute(const std::filesystem::path& filePath);
 };
 
