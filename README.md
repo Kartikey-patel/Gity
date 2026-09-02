@@ -253,6 +253,30 @@ gity add hello.txt
 gity commit "Update hello.txt"
 ```
 
+## Testing
+
+Gity includes an automated CLI integration test suite covering the currently implemented behavior, including:
+
+- Repository initialization
+- File staging
+- Commits and history
+- Clean repository status
+- Staged and unstaged modifications
+- Staged and unstaged deletions
+- Staged new files
+- Untracked files
+- Staged-new-then-deleted files
+- `.gityignore`
+- Multiple commits
+- Repository persistence
+- Invalid input handling
+
+Run the test suite with:
+
+```bash
+./tests/run_tests.sh
+
+
 ## Internal Architecture
 
 ```text
@@ -459,6 +483,7 @@ The current core includes:
 - Staged deletions
 - Commit history
 - Three-state repository status
+- Automated CLI integration testing
 - Untracked-file detection
 - `.gityignore`
 - Filesystem traversal
@@ -479,7 +504,6 @@ Potential future work includes:
 - [ ] Merge
 - [ ] Tags
 - [ ] Improved object management
-- [ ] Automated unit and integration testing
 - [ ] Performance improvements
 - [ ] Remote repository support
 
